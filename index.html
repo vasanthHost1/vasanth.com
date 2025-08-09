@@ -182,10 +182,10 @@
   <!-- Play/Pause & Volume -->
   <div class="controls">
     <button id="playPauseBtn" onclick="togglePlay()">
-      <svg id="playIcon" viewBox="0 0 24 24">
+      <svg id="playIcon" viewBox="0 0 24 24" style="display:none;">
         <path d="M8 5v14l11-7z"/>
       </svg>
-      <svg id="pauseIcon" style="display:none;" viewBox="0 0 24 24">
+      <svg id="pauseIcon" viewBox="0 0 24 24">
         <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
       </svg>
     </button>
@@ -215,7 +215,7 @@
   <script>
     let player;
     let duration = 0;
-    let isPlaying = false;
+    let isPlaying = true;  // Start with playing state
     let interval;
     const apiKeys = [
       "AIzaSyA6HuHCZSivAGvISxA4h3EglIQJgmee66k",
@@ -256,6 +256,9 @@
 
     function onPlayerReady() {
       interval = setInterval(updateProgress, 1000);
+      // Show pause icon on load (playing state)
+      document.getElementById('playIcon').style.display = "none";
+      document.getElementById('pauseIcon').style.display = "block";
     }
 
     function togglePlay() {
@@ -279,71 +282,20 @@
       player.setVolume(this.value);
     });
 
-    function parseDuration(ISO8601Duration) {
-      // Converts ISO8601 duration (e.g. PT1H2M30S or PT5M20S) to total seconds
-      const regex = /PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/;
-      const matches = ISO8601Duration.match(regex);
-      const hours = parseInt(matches[1] || 0);
-      const minutes = parseInt(matches[2] || 0);
-      const seconds = parseInt(matches[3] || 0);
-      return hours * 3600 + minutes * 60 + seconds;
-    }
-
     function searchSong() {
       const query = document.getElementById('searchInput').value.trim();
       if (!query) return;
-
       const apiKey = getApiKey();
-
-      // Step 1: Search for videos
-      fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query)}&key=${apiKey}&type=video&videoEmbeddable=true&maxResults=5`)
+      fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query)}&key=${apiKey}&type=video&videoEmbeddable=true&maxResults=1`)
         .then(res => res.json())
         .then(data => {
-          if (!data.items || !data.items.length) {
-            alert("No matching videos found.");
-            return;
-          }
-
-          const videoIds = data.items.map(v => v.id.videoId).join(',');
-
-          // Step 2: Get video durations and snippet
-          return fetch(`https://www.googleapis.com/youtube/v3/videos?part=contentDetails,snippet&id=${videoIds}&key=${apiKey}`)
-            .then(res => res.json());
-        })
-        .then(videoData => {
-          if (!videoData || !videoData.items) return;
-
-          // Step 3: Filter by duration (1–10 min)
-          const validVideos = videoData.items.filter(video => {
-            const totalSec = parseDuration(video.contentDetails.duration);
-            return totalSec >= 60 && totalSec <= 600; // 1–10 minutes
-          });
-
-          if (!validVideos.length) {
-            alert("No suitable length videos found (1–10 minutes).");
-            return;
-          }
-
-          // Step 4: Play first valid video
-          const video = validVideos[0];
-          const videoId = video.id;
-          const title = video.snippet.title;
-          const thumb = video.snippet.thumbnails.medium.url;
-
-          player.loadVideoById(videoId);
-          document.getElementById('videoTitle').innerText = title;
+          if (!data.items || !data.items.length) return;
+          const video = data.items[0];
+          player.loadVideoById(video.id.videoId);
+          document.getElementById('videoTitle').innerText = video.snippet.title;
           document.getElementById('videoArtist').innerText = "YouTube Audio";
-          document.getElementById('thumbnail').style.backgroundImage = `url('${thumb}')`;
-          document.getElementById('thumbnail').style.display = 'block';
-
-          setTimeout(() => {
-            player.unMute();
-            player.playVideo();
-            duration = player.getDuration();
-          }, 1500);
-        })
-        .catch(err => {
-          alert("Error loading video: " + err.message);
+          document.getElementById('thumbnail').style.backgroundImage = `url(${video.snippet.thumbnails.medium.url})`;
+          setTimeout(() => { duration = player.getDuration(); }, 1500);
         });
     }
 
