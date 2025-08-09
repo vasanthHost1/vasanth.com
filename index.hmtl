@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Foxxy Music</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background: #000;
+      font-family: 'Poppins', sans-serif;
+      margin: 0;
+      padding: 0;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* Search bar */
+    .search-bar {
+      display: flex;
+      width: 90%;
+      max-width: 400px;
+      margin: 20px auto;
+      border-radius: 25px;
+      overflow: hidden;
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(10px);
+    }
+    .search-bar input {
+      flex: 1;
+      border: none;
+      padding: 12px 15px;
+      outline: none;
+      background: transparent;
+      color: white;
+      font-size: 14px;
+    }
+    .search-bar button {
+      background: #1db954;
+      color: white;
+      border: none;
+      padding: 0 20px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    /* Album art */
+    .album-art {
+      width: 250px;
+      height: 250px;
+      border-radius: 50%;
+      margin-top: 20px;
+      background: rgba(255,255,255,0.05) center/cover no-repeat;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+
+    /* Song title */
+    .song-title {
+      font-size: 1.2em;
+      font-weight: 600;
+      margin-top: 20px;
+      text-align: center;
+    }
+    .song-artist {
+      font-size: 0.9em;
+      opacity: 0.8;
+      text-align: center;
+    }
+
+    /* Controls */
+    .controls {
+      margin-top: 30px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 20px;
+    }
+    .controls button {
+      background: #1db954;
+      border: none;
+      color: white;
+      font-size: 22px;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+
+    /* Volume slider */
+    .volume-container {
+      margin-top: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: white;
+    }
+    .volume-slider {
+      width: 150px;
+    }
+
+    /* Progress bar */
+    .progress-container {
+      margin-top: 25px;
+      width: 80%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .time {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      font-size: 0.8em;
+      opacity: 0.8;
+    }
+    .progress-bar {
+      width: 100%;
+      -webkit-appearance: none;
+      height: 5px;
+      background: rgba(255,255,255,0.3);
+      outline: none;
+      border-radius: 5px;
+      overflow: hidden;
+    }
+    .progress-bar::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: white;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Search -->
+  <div class="search-bar">
+    <input type="text" id="searchInput" placeholder="Search a song...">
+    <button onclick="searchSong()">Search</button>
+  </div>
+
+  <!-- Album Art -->
+  <div class="album-art" id="thumbnail"></div>
+
+  <!-- Song Info -->
+  <div class="song-title" id="videoTitle">Song Title</div>
+  <div class="song-artist" id="videoArtist">Artist</div>
+
+  <!-- Play/Pause -->
+  <div class="controls">
+    <button onclick="togglePlay()">⏯</button>
+  </div>
+
+  <!-- Volume Control -->
+  <div class="volume-container">
+    <span>🔊</span>
+    <input type="range" min="0" max="100" value="50" class="volume-slider" id="volumeSlider" oninput="setVolume(this.value)">
+  </div>
+
+  <!-- Progress -->
+  <div class="progress-container">
+    <div class="time">
+      <span id="currentTime">0:00</span>
+      <span id="totalTime">0:00</span>
+    </div>
+    <input type="range" id="progressBar" class="progress-bar" value="0" min="0" max="100">
+  </div>
+
+  <!-- Hidden Player -->
+  <div id="player" style="position:absolute; left:-9999px;"></div>
+
+  <script>
+    let player;
+    let duration = 0;
+    let interval;
+    const apiKeys = [
+      "AIzaSyA6HuHCZSivAGvISxA4h3EglIQJgmee66k",
+      "AIzaSyCkUWUbVYjZDNRhNJBJ-NkN8ta3ga4vY3Y",
+      "AIzaSyD8TitWTpspygPuDnbilqeaLj9AG1krL48"
+    ];
+    let currentKeyIndex = 0;
+
+    function getApiKey() {
+      const key = apiKeys[currentKeyIndex];
+      currentKeyIndex = (currentKeyIndex + 1) % apiKeys.length;
+      return key;
+    }
+
+    function formatTime(sec) {
+      const m = Math.floor(sec / 60);
+      const s = Math.floor(sec % 60);
+      return `${m}:${s.toString().padStart(2, '0')}`;
+    }
+
+    function updateProgress() {
+      if (player && typeof player.getCurrentTime === 'function') {
+        const current = player.getCurrentTime();
+        document.getElementById('currentTime').innerText = formatTime(current);
+        document.getElementById('progressBar').value = (current / duration) * 100;
+      }
+    }
+
+    function onYouTubeIframeAPIReady() {
+      player = new YT.Player('player', {
+        height: '360',
+        width: '640',
+        videoId: '',
+        playerVars: {
+          autoplay: 0,
+          controls: 1,
+          modestbranding: 1,
+          rel: 0
+        },
+        events: {
+          onReady: onPlayerReady
+        }
+      });
+    }
+
+    function onPlayerReady() {
+      interval = setInterval(updateProgress, 1000);
+    }
+
+    function togglePlay() {
+      if (player && player.getPlayerState) {
+        const state = player.getPlayerState();
+        if (state === YT.PlayerState.PLAYING) {
+          player.pauseVideo();
+        } else {
+          player.playVideo();
+        }
+      }
+    }
+
+    function setVolume(val) {
+      if (player && typeof player.setVolume === 'function') {
+        player.setVolume(val);
+      }
+    }
+
+    function searchSong() {
+      const query = document.getElementById('searchInput').value.trim();
+      if (!query) return;
+
+      const apiKey = getApiKey();
+      fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query)}&key=${apiKey}&type=video&videoEmbeddable=true&maxResults=1`)
+        .then(res => res.json())
+        .then(data => {
+          if (!data.items || !data.items.length) {
+            alert("No results found.");
+            return;
+          }
+
+          const video = data.items[0];
+          const videoId = video.id.videoId;
+          const title = video.snippet.title;
+          const thumb = video.snippet.thumbnails.high.url;
+
+          player.loadVideoById(videoId);
+
+          document.getElementById('videoTitle').innerText = title;
+          document.getElementById('videoArtist').innerText = video.snippet.channelTitle;
+          document.getElementById('thumbnail').style.backgroundImage = `url('${thumb}')`;
+
+          setTimeout(() => {
+            duration = player.getDuration();
+            document.getElementById('totalTime').innerText = formatTime(duration);
+          }, 2000);
+        })
+        .catch(err => {
+          alert("Error loading video: " + err.message);
+        });
+    }
+
+    // Load YouTube API
+    const tag = document.createElement('script');
+    tag.src = "https://www.youtube.com/iframe_api";
+    const firstScriptTag = document.getElementsByTagName('script')[0];
+    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+  </script>
+</body>
+</html>
