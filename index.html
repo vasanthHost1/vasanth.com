@@ -77,17 +77,23 @@
     .controls button {
       background: #1db954;
       border: none;
-      color: white;
-      font-size: 22px;
       width: 60px;
       height: 60px;
       border-radius: 50%;
       cursor: pointer;
       box-shadow: 0 5px 15px rgba(0,0,0,0.3);
       transition: transform 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
     .controls button:hover {
       transform: scale(1.1);
+    }
+    .controls svg {
+      width: 28px;
+      height: 28px;
+      fill: white;
     }
 
     /* Progress bar */
@@ -143,12 +149,18 @@
     #volumeBtn {
       background: #1db954;
       border: none;
-      color: white;
-      font-size: 18px;
       width: 40px;
       height: 40px;
       border-radius: 50%;
       cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #volumeBtn svg {
+      width: 20px;
+      height: 20px;
+      fill: white;
     }
   </style>
 </head>
@@ -169,9 +181,21 @@
 
   <!-- Play/Pause & Volume -->
   <div class="controls">
-    <button id="playPauseBtn" onclick="togglePlay()">▶️</button>
+    <button id="playPauseBtn" onclick="togglePlay()">
+      <svg id="playIcon" viewBox="0 0 24 24">
+        <path d="M8 5v14l11-7z"/>
+      </svg>
+      <svg id="pauseIcon" style="display:none;" viewBox="0 0 24 24">
+        <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+      </svg>
+    </button>
+
     <div class="volume-container">
-      <button id="volumeBtn" onclick="toggleVolumeSlider()">🔊</button>
+      <button id="volumeBtn" onclick="toggleVolumeSlider()">
+        <svg viewBox="0 0 24 24">
+          <path d="M3 9v6h4l5 5V4L7 9H3z"/>
+        </svg>
+      </button>
       <input type="range" id="volumeControl" min="0" max="100" value="50">
     </div>
   </div>
@@ -237,10 +261,12 @@
     function togglePlay() {
       if (!isPlaying) {
         player.playVideo();
-        document.getElementById('playPauseBtn').innerText = "⏸️";
+        document.getElementById('playIcon').style.display = "none";
+        document.getElementById('pauseIcon').style.display = "block";
       } else {
         player.pauseVideo();
-        document.getElementById('playPauseBtn').innerText = "▶️";
+        document.getElementById('playIcon').style.display = "block";
+        document.getElementById('pauseIcon').style.display = "none";
       }
       isPlaying = !isPlaying;
     }
