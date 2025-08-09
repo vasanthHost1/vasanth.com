@@ -5,7 +5,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
   <style>
     body {
-      background: #000;
+      background: #121212;
       font-family: 'Poppins', sans-serif;
       margin: 0;
       padding: 0;
@@ -23,8 +23,7 @@
       margin: 20px auto;
       border-radius: 25px;
       overflow: hidden;
-      background: rgba(255, 255, 255, 0.08);
-      backdrop-filter: blur(10px);
+      background: #282828;
     }
     .search-bar input {
       flex: 1;
@@ -48,9 +47,9 @@
     .album-art {
       width: 250px;
       height: 250px;
-      border-radius: 50%;
+      border-radius: 10px;
       margin-top: 20px;
-      background: rgba(255,255,255,0.05) center/cover no-repeat;
+      background: #333 url('') center/cover no-repeat;
       box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     }
 
@@ -73,7 +72,7 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      gap: 20px;
+      gap: 15px;
     }
     .controls button {
       background: #1db954;
@@ -84,19 +83,11 @@
       height: 60px;
       border-radius: 50%;
       cursor: pointer;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+      transition: transform 0.2s ease;
     }
-
-    /* Volume slider */
-    .volume-container {
-      margin-top: 20px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      color: white;
-    }
-    .volume-slider {
-      width: 150px;
+    .controls button:hover {
+      transform: scale(1.1);
     }
 
     /* Progress bar */
@@ -129,7 +120,34 @@
       width: 12px;
       height: 12px;
       border-radius: 50%;
-      background: white;
+      background: #1db954;
+      cursor: pointer;
+    }
+
+    /* Volume control */
+    .volume-container {
+      display: flex;
+      align-items: center;
+      position: relative;
+    }
+    #volumeControl {
+      width: 0;
+      opacity: 0;
+      transition: width 0.3s ease, opacity 0.3s ease;
+      margin-left: 5px;
+    }
+    .volume-container.show #volumeControl {
+      width: 100px;
+      opacity: 1;
+    }
+    #volumeBtn {
+      background: #1db954;
+      border: none;
+      color: white;
+      font-size: 18px;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
       cursor: pointer;
     }
   </style>
@@ -149,15 +167,13 @@
   <div class="song-title" id="videoTitle">Song Title</div>
   <div class="song-artist" id="videoArtist">Artist</div>
 
-  <!-- Play/Pause -->
+  <!-- Play/Pause & Volume -->
   <div class="controls">
-    <button onclick="togglePlay()">⏯</button>
-  </div>
-
-  <!-- Volume Control -->
-  <div class="volume-container">
-    <span>🔊</span>
-    <input type="range" min="0" max="100" value="50" class="volume-slider" id="volumeSlider" oninput="setVolume(this.value)">
+    <button id="playPauseBtn" onclick="togglePlay()">▶️</button>
+    <div class="volume-container">
+      <button id="volumeBtn" onclick="toggleVolumeSlider()">🔊</button>
+      <input type="range" id="volumeControl" min="0" max="100" value="50">
+    </div>
   </div>
 
   <!-- Progress -->
@@ -175,6 +191,7 @@
   <script>
     let player;
     let duration = 0;
+    let isPlaying = false;
     let interval;
     const apiKeys = [
       "AIzaSyA6HuHCZSivAGvISxA4h3EglIQJgmee66k",
@@ -199,7 +216,7 @@
       if (player && typeof player.getCurrentTime === 'function') {
         const current = player.getCurrentTime();
         document.getElementById('currentTime').innerText = formatTime(current);
-        document.getElementById('progressBar').value = (current / duration) * 100;
+        document.getElementById('progressBar').value = (current / duration) * 100 || 0;
       }
     }
 
@@ -208,15 +225,8 @@
         height: '360',
         width: '640',
         videoId: '',
-        playerVars: {
-          autoplay: 0,
-          controls: 1,
-          modestbranding: 1,
-          rel: 0
-        },
-        events: {
-          onReady: onPlayerReady
-        }
+        playerVars: { autoplay: 0, controls: 0, modestbranding: 1, rel: 0 },
+        events: { onReady: onPlayerReady }
       });
     }
 
@@ -225,61 +235,44 @@
     }
 
     function togglePlay() {
-      if (player && player.getPlayerState) {
-        const state = player.getPlayerState();
-        if (state === YT.PlayerState.PLAYING) {
-          player.pauseVideo();
-        } else {
-          player.playVideo();
-        }
+      if (!isPlaying) {
+        player.playVideo();
+        document.getElementById('playPauseBtn').innerText = "⏸️";
+      } else {
+        player.pauseVideo();
+        document.getElementById('playPauseBtn').innerText = "▶️";
       }
+      isPlaying = !isPlaying;
     }
 
-    function setVolume(val) {
-      if (player && typeof player.setVolume === 'function') {
-        player.setVolume(val);
-      }
+    function toggleVolumeSlider() {
+      document.querySelector('.volume-container').classList.toggle('show');
     }
+
+    document.getElementById('volumeControl').addEventListener('input', function() {
+      player.setVolume(this.value);
+    });
 
     function searchSong() {
       const query = document.getElementById('searchInput').value.trim();
       if (!query) return;
-
       const apiKey = getApiKey();
       fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query)}&key=${apiKey}&type=video&videoEmbeddable=true&maxResults=1`)
         .then(res => res.json())
         .then(data => {
-          if (!data.items || !data.items.length) {
-            alert("No results found.");
-            return;
-          }
-
+          if (!data.items || !data.items.length) return;
           const video = data.items[0];
-          const videoId = video.id.videoId;
-          const title = video.snippet.title;
-          const thumb = video.snippet.thumbnails.high.url;
-
-          player.loadVideoById(videoId);
-
-          document.getElementById('videoTitle').innerText = title;
-          document.getElementById('videoArtist').innerText = video.snippet.channelTitle;
-          document.getElementById('thumbnail').style.backgroundImage = `url('${thumb}')`;
-
-          setTimeout(() => {
-            duration = player.getDuration();
-            document.getElementById('totalTime').innerText = formatTime(duration);
-          }, 2000);
-        })
-        .catch(err => {
-          alert("Error loading video: " + err.message);
+          player.loadVideoById(video.id.videoId);
+          document.getElementById('videoTitle').innerText = video.snippet.title;
+          document.getElementById('videoArtist').innerText = "YouTube Audio";
+          document.getElementById('thumbnail').style.backgroundImage = `url(${video.snippet.thumbnails.medium.url})`;
+          setTimeout(() => { duration = player.getDuration(); }, 1500);
         });
     }
 
-    // Load YouTube API
     const tag = document.createElement('script');
     tag.src = "https://www.youtube.com/iframe_api";
-    const firstScriptTag = document.getElementsByTagName('script')[0];
-    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+    document.body.appendChild(tag);
   </script>
 </body>
 </html>
