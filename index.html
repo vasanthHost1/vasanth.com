@@ -79,115 +79,105 @@
 
   <div id="player" style="position:absolute; left:-9999px;"></div>
 
-  <script>
-    let player;
-    let duration = 0;
-    let interval;
-    const apiKeys = [
-      "AIzaSyA6HuHCZSivAGvISxA4h3EglIQJgmee66k",
-      "AIzaSyCkUWUbVYjZDNRhNJBJ-NkN8ta3ga4vY3Y",
-      "AIzaSyD8TitWTpspygPuDnbilqeaLj9AG1krL48"
-    ];
-    let currentKeyIndex = 0;
-    let lastPlayed = "";
-    let skipNextFetch = false; // ✅ new flag
-    const sheetURL = "https://script.google.com/macros/s/AKfycbzEhvARdMVq6W7srYh2L4aSSsc5DKyDsKAcVIUJ7D9prEUCM5nl8ibFXuDpHgNRBZvG/exec";
 
-    function getApiKey() {
-      const key = apiKeys[currentKeyIndex];
-      currentKeyIndex = (currentKeyIndex + 1) % apiKeys.length;
-      return key;
+        <script>
+  let player;
+  let duration = 0;
+  let interval;
+  const apiKeys = [
+    "AIzaSyA6HuHCZSivAGvISxA4h3EglIQJgmee66k",
+    "AIzaSyCkUWUbVYjZDNRhNJBJ-NkN8ta3ga4vY3Y",
+    "AIzaSyD8TitWTpspygPuDnbilqeaLj9AG1krL48"
+  ];
+  let currentKeyIndex = 0;
+  let lastPlayed = "";
+  let lastVideoId = "";   // ✅ Track by video ID now
+  const sheetURL = "https://script.google.com/macros/s/AKfycbzEhvARdMVq6W7srYh2L4aSSsc5DKyDsKAcVIUJ7D9prEUCM5nl8ibFXuDpHgNRBZvG/exec";
+
+  function getApiKey() {
+    const key = apiKeys[currentKeyIndex];
+    currentKeyIndex = (currentKeyIndex + 1) % apiKeys.length;
+    return key;
+  }
+
+  function formatTime(sec) {
+    const m = Math.floor(sec / 60);
+    const s = Math.floor(sec % 60);
+    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+  }
+
+  function updateTrackProgress() {
+    if (player && typeof player.getCurrentTime === 'function') {
+      const current = player.getCurrentTime();
+      document.getElementById('trackProgress').innerText = `${formatTime(current)} / ${formatTime(duration)}`;
     }
+  }
 
-    function formatTime(sec) {
-      const m = Math.floor(sec / 60);
-      const s = Math.floor(sec % 60);
-      return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+  function onYouTubeIframeAPIReady() {
+    player = new YT.Player('player', {
+      height: '360',
+      width: '640',
+      videoId: '',
+      playerVars: { autoplay: 0, controls: 1, modestbranding: 1, rel: 0 },
+      events: { onReady: onPlayerReady }
+    });
+  }
+
+  function onPlayerReady() {
+    interval = setInterval(updateTrackProgress, 1000);
+    fetchFromSheet(); 
+    setInterval(fetchFromSheet, 2000); 
+  }
+
+  function unmutePlayer() {
+    if (player && typeof player.playVideo === 'function') {
+      player.unMute();
+      player.playVideo();
     }
+  }
 
-    function updateTrackProgress() {
-      if (player && typeof player.getCurrentTime === 'function') {
-        const current = player.getCurrentTime();
-        document.getElementById('trackProgress').innerText = `${formatTime(current)} / ${formatTime(duration)}`;
-      }
+  function pausePlayer() {
+    if (player && typeof player.pauseVideo === 'function') {
+      player.pauseVideo();
     }
+  }
 
-    function onYouTubeIframeAPIReady() {
-      player = new YT.Player('player', {
-        height: '360',
-        width: '640',
-        videoId: '',
-        playerVars: {
-          autoplay: 0,
-          controls: 1,
-          modestbranding: 1,
-          rel: 0
-        },
-        events: {
-          onReady: onPlayerReady
-        }
-      });
+  function setVolume(val) {
+    if (player && typeof player.setVolume === 'function') {
+      player.setVolume(val);
     }
+  }
 
-    function onPlayerReady() {
-      interval = setInterval(updateTrackProgress, 1000);
-      fetchFromSheet(); // Fetch when ready
-      setInterval(fetchFromSheet, 2000); // Poll every 2 sec
-    }
+  function searchAndStoreSong(songTitle) {
+    fetch(sheetURL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: `title=${encodeURIComponent(songTitle)}`
+    })
+    .then(res => res.text())
+    .then(text => console.log("Stored:", text))
+    .catch(err => console.error("POST failed:", err));
+  }
 
-    function unmutePlayer() {
-      if (player && typeof player.playVideo === 'function') {
-        player.unMute();
-        player.playVideo();
-      }
-    }
+  function searchSong(queryFromParam = null, retry = 0) {
+    const query = queryFromParam || document.getElementById('searchInput').value.trim();
+    if (!query) return;
 
-    function pausePlayer() {
-      if (player && typeof player.pauseVideo === 'function') {
-        player.pauseVideo();
-      }
-    }
+    const apiKey = apiKeys[retry];
+    if (!apiKey) return alert("Foxxy's servers are resting 🎧 Come back in a few hours😴.");
 
-    function setVolume(val) {
-      if (player && typeof player.setVolume === 'function') {
-        player.setVolume(val);
-      }
-    }
+    fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query)}&key=${apiKey}&type=video&videoEmbeddable=true&maxResults=1`)
+      .then(res => res.json())
+      .then(data => {
+        if (!data.items || !data.items.length) throw new Error("No results");
 
-    function searchAndStoreSong(songTitle) {
-      fetch(sheetURL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: `title=${encodeURIComponent(songTitle)}`,
-      })
-      .then(res => res.text())
-      .then(text => {
-        console.log("Stored:", text);
-        skipNextFetch = true; // ✅ skip one fetch after storing
-      })
-      .catch(err => console.error("POST failed:", err));
-    }
+        const video = data.items[0];
+        const videoId = video.id.videoId;
+        const title = video.snippet.title;
+        const thumb = video.snippet.thumbnails.medium.url;
 
-    // ✅ Replaced function starts here
-    function searchSong(queryFromParam = null, retry = 0) {
-      const query = queryFromParam || document.getElementById('searchInput').value.trim();
-      if (!query) return;
-
-      const apiKey = apiKeys[retry];
-      if (!apiKey) return alert("Foxxy's servers are resting 🎧 Come back in a few hours😴.");
-
-      fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query)}&key=${apiKey}&type=video&videoEmbeddable=true&maxResults=1`)
-        .then(res => res.json())
-        .then(data => {
-          if (!data.items || !data.items.length) throw new Error("No results");
-
-          const video = data.items[0];
-          const videoId = video.id.videoId;
-          const title = video.snippet.title;
-          const thumb = video.snippet.thumbnails.medium.url;
-
+        // ✅ Only play if it's a different video
+        if (videoId !== lastVideoId) {
           player.loadVideoById(videoId);
           document.getElementById('videoTitle').innerText = title;
           document.getElementById('thumbnail').src = thumb;
@@ -198,43 +188,41 @@
             player.playVideo();
             duration = player.getDuration();
             updateTrackProgress();
-          }, 1500);
+          }, 500); // shorter delay is enough
 
-          if (!queryFromParam) {
-            searchAndStoreSong(query);
-            lastPlayed = query;
-          }
-        })
-        .catch(err => {
-          console.warn(`API key failed: ${apiKey}. Retrying...`);
-          searchSong(queryFromParam, retry + 1);
-        });
-    }
-    // ✅ Replaced function ends here
+          lastPlayed = query;
+          lastVideoId = videoId;  // ✅ remember video ID
+        }
 
-    function fetchFromSheet() {
-      if (skipNextFetch) {
-        skipNextFetch = false; // ✅ ignore once only
-        return;
-      }
+        if (!queryFromParam) {
+          searchAndStoreSong(query);
+        }
+      })
+      .catch(err => {
+        console.warn(`API key failed: ${apiKey}. Retrying...`);
+        searchSong(queryFromParam, retry + 1);
+      });
+  }
 
-      fetch(sheetURL)
-        .then(res => res.text())
-        .then(songTitle => {
-          songTitle = songTitle.trim();
-          if (songTitle && songTitle !== lastPlayed) {
-            lastPlayed = songTitle;
-            document.getElementById('searchInput').value = songTitle;
-            searchSong(songTitle); // Trigger search and play
-          }
-        })
-        .catch(err => console.error("Fetch failed:", err));
-    }
+  function fetchFromSheet() {
+    fetch(sheetURL)
+      .then(res => res.text())
+      .then(songTitle => {
+        songTitle = songTitle.trim();
+        if (songTitle && songTitle !== lastPlayed) {
+          lastPlayed = songTitle;
+          document.getElementById('searchInput').value = songTitle;
+          searchSong(songTitle); 
+        }
+      })
+      .catch(err => console.error("Fetch failed:", err));
+  }
 
-    const tag = document.createElement('script');
-    tag.src = "https://www.youtube.com/iframe_api";
-    const firstScriptTag = document.getElementsByTagName('script')[0];
-    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-  </script>
+  const tag = document.createElement('script');
+  tag.src = "https://www.youtube.com/iframe_api";
+  const firstScriptTag = document.getElementsByTagName('script')[0];
+  firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+        </script>
+  
 </body>
 </html>
