@@ -1,222 +1,87 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Foxxy Music</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Foxxy Sync Music</title>
   <style>
     body {
-      background: #121212;
-      font-family: 'Poppins', sans-serif;
+      background-color: #111;
+      color: white;
+      font-family: sans-serif;
+      text-align: center;
+      padding: 20px;
       margin: 0;
-      padding: 0;
-      color: white;
+      overflow-x: hidden;
+    }
+    input[type="text"] {
+      padding: 10px;
+      width: 60%;
+      font-size: 18px;
+      border-radius: 8px;
+      border: none;
+      margin-bottom: 10px;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      border: none;
+      border-radius: 6px;
+      background-color: green;
+      color: black;
+      cursor: pointer;
+      margin: 5px;
+    }
+    #videoTitle {
+      font-size: 20px;
+      margin-top: 10px;
+    }
+    #controlsWrapper {
       display: flex;
       flex-direction: column;
       align-items: center;
-    }
-
-    /* Search bar */
-    .search-bar {
-      display: flex;
-      width: 90%;
-      max-width: 400px;
-      margin: 20px auto;
-      border-radius: 25px;
-      overflow: hidden;
-      background: #282828;
-    }
-    .search-bar input {
-      flex: 1;
-      border: none;
-      padding: 12px 15px;
-      outline: none;
-      background: transparent;
-      color: white;
-      font-size: 14px;
-    }
-    .search-bar button {
-      background: #1db954;
-      color: white;
-      border: none;
-      padding: 0 20px;
-      cursor: pointer;
-      font-weight: bold;
-    }
-
-    /* Album art */
-    .album-art {
-      width: 250px;
-      height: 250px;
-      border-radius: 10px;
-      margin-top: 20px;
-      background: #333 url('') center/cover no-repeat;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-    }
-
-    /* Song title */
-    .song-title {
-      font-size: 1.2em;
-      font-weight: 600;
-      margin-top: 20px;
-      text-align: center;
-    }
-    .song-artist {
-      font-size: 0.9em;
-      opacity: 0.8;
-      text-align: center;
-    }
-
-    /* Controls */
-    .controls {
-      margin-top: 30px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 15px;
-    }
-    .controls button {
-      background: #1db954;
-      border: none;
-      width: 60px;
-      height: 60px;
-      border-radius: 50%;
-      cursor: pointer;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-      transition: transform 0.2s ease;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .controls button:hover {
-      transform: scale(1.1);
-    }
-    .controls svg {
-      width: 28px;
-      height: 28px;
-      fill: white;
-    }
-
-    /* Progress bar */
-    .progress-container {
-      margin-top: 25px;
-      width: 80%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-    .time {
-      display: flex;
-      justify-content: space-between;
-      width: 100%;
-      font-size: 0.8em;
-      opacity: 0.8;
-    }
-    .progress-bar {
-      width: 100%;
-      -webkit-appearance: none;
-      height: 5px;
-      background: rgba(255,255,255,0.3);
-      outline: none;
-      border-radius: 5px;
-      overflow: hidden;
-    }
-    .progress-bar::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      appearance: none;
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-      background: #1db954;
-      cursor: pointer;
-    }
-
-    /* Volume control */
-    .volume-container {
-      display: flex;
-      align-items: center;
-      position: relative;
+      margin-top: 15px;
     }
     #volumeControl {
-      width: 0;
-      opacity: 0;
-      transition: width 0.3s ease, opacity 0.3s ease;
-      margin-left: 5px;
+      margin-top: 10px;
     }
-    .volume-container.show #volumeControl {
-      width: 100px;
-      opacity: 1;
+    #trackProgress {
+      margin-top: 8px;
+      font-family: monospace;
+      font-size: 16px;
     }
-    #volumeBtn {
-      background: #1db954;
-      border: none;
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    #volumeBtn svg {
-      width: 20px;
-      height: 20px;
-      fill: white;
+    #thumbnail {
+      margin-top: 10px;
+      max-width: 300px;
+      border-radius: 12px;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
     }
   </style>
 </head>
 <body>
-
-  <!-- Search -->
-  <div class="search-bar">
-    <input type="text" id="searchInput" placeholder="Search a song...">
-    <button onclick="searchSong()">Search</button>
-  </div>
-
-  <!-- Album Art -->
-  <div class="album-art" id="thumbnail"></div>
-
-  <!-- Song Info -->
-  <div class="song-title" id="videoTitle">Song Title</div>
-  <div class="song-artist" id="videoArtist">Artist</div>
-
-  <!-- Play/Pause & Volume -->
-  <div class="controls">
-    <button id="playPauseBtn" onclick="togglePlay()">
-      <svg id="playIcon" viewBox="0 0 24 24" style="display:none;">
-        <path d="M8 5v14l11-7z"/>
-      </svg>
-      <svg id="pauseIcon" viewBox="0 0 24 24">
-        <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
-      </svg>
-    </button>
-
-    <div class="volume-container">
-      <button id="volumeBtn" onclick="toggleVolumeSlider()">
-        <svg viewBox="0 0 24 24">
-          <path d="M3 9v6h4l5 5V4L7 9H3z"/>
-        </svg>
-      </button>
-      <input type="range" id="volumeControl" min="0" max="100" value="50">
+  <h1>Foxxy Sync Music 🎵</h1>
+  <input type="text" id="searchInput" placeholder="Search a song">
+  <button onclick="searchSong()">Search</button>
+  <div id="videoTitle"></div>
+  <img id="thumbnail" src="" alt="" style="display:none">
+  <div id="controlsWrapper">
+    <div>
+      <button id="unmuteBtn" onclick="unmutePlayer()">▶️ Play</button>
+      <button id="pauseBtn" onclick="pausePlayer()">⏸ Pause</button>
     </div>
-  </div>
-
-  <!-- Progress -->
-  <div class="progress-container">
-    <div class="time">
-      <span id="currentTime">0:00</span>
-      <span id="totalTime">0:00</span>
+    <div id="volumeControl">
+      <label for="volumeSlider">🔉 Volume</label><br>
+      <input type="range" id="volumeSlider" min="0" max="100" value="50" onchange="setVolume(this.value)">
     </div>
-    <input type="range" id="progressBar" class="progress-bar" value="0" min="0" max="100">
+    <div id="trackProgress">00:00 / 00:00</div>
   </div>
 
-  <!-- Hidden Player -->
   <div id="player" style="position:absolute; left:-9999px;"></div>
 
   <script>
     let player;
     let duration = 0;
-    let isPlaying = true;  // Start with playing state
     let interval;
     const apiKeys = [
       "AIzaSyA6HuHCZSivAGvISxA4h3EglIQJgmee66k",
@@ -224,6 +89,9 @@
       "AIzaSyD8TitWTpspygPuDnbilqeaLj9AG1krL48"
     ];
     let currentKeyIndex = 0;
+    let lastPlayed = "";
+    let skipNextFetch = false; // ✅ new flag
+    const sheetURL = "https://script.google.com/macros/s/AKfycbzEhvARdMVq6W7srYh2L4aSSsc5DKyDsKAcVIUJ7D9prEUCM5nl8ibFXuDpHgNRBZvG/exec";
 
     function getApiKey() {
       const key = apiKeys[currentKeyIndex];
@@ -234,14 +102,13 @@
     function formatTime(sec) {
       const m = Math.floor(sec / 60);
       const s = Math.floor(sec % 60);
-      return `${m}:${s.toString().padStart(2, '0')}`;
+      return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
     }
 
-    function updateProgress() {
+    function updateTrackProgress() {
       if (player && typeof player.getCurrentTime === 'function') {
         const current = player.getCurrentTime();
-        document.getElementById('currentTime').innerText = formatTime(current);
-        document.getElementById('progressBar').value = (current / duration) * 100 || 0;
+        document.getElementById('trackProgress').innerText = `${formatTime(current)} / ${formatTime(duration)}`;
       }
     }
 
@@ -250,60 +117,124 @@
         height: '360',
         width: '640',
         videoId: '',
-        playerVars: { autoplay: 0, controls: 0, modestbranding: 1, rel: 0 },
-        events: { onReady: onPlayerReady }
+        playerVars: {
+          autoplay: 0,
+          controls: 1,
+          modestbranding: 1,
+          rel: 0
+        },
+        events: {
+          onReady: onPlayerReady
+        }
       });
     }
 
     function onPlayerReady() {
-      interval = setInterval(updateProgress, 1000);
-      // Show pause icon on load (playing state)
-      document.getElementById('playIcon').style.display = "none";
-      document.getElementById('pauseIcon').style.display = "block";
+      interval = setInterval(updateTrackProgress, 1000);
+      fetchFromSheet(); // Fetch when ready
+      setInterval(fetchFromSheet, 2000); // Poll every 2 sec
     }
 
-    function togglePlay() {
-      if (!isPlaying) {
+    function unmutePlayer() {
+      if (player && typeof player.playVideo === 'function') {
+        player.unMute();
         player.playVideo();
-        document.getElementById('playIcon').style.display = "none";
-        document.getElementById('pauseIcon').style.display = "block";
-      } else {
-        player.pauseVideo();
-        document.getElementById('playIcon').style.display = "block";
-        document.getElementById('pauseIcon').style.display = "none";
       }
-      isPlaying = !isPlaying;
     }
 
-    function toggleVolumeSlider() {
-      document.querySelector('.volume-container').classList.toggle('show');
+    function pausePlayer() {
+      if (player && typeof player.pauseVideo === 'function') {
+        player.pauseVideo();
+      }
     }
 
-    document.getElementById('volumeControl').addEventListener('input', function() {
-      player.setVolume(this.value);
-    });
+    function setVolume(val) {
+      if (player && typeof player.setVolume === 'function') {
+        player.setVolume(val);
+      }
+    }
 
-    function searchSong() {
-      const query = document.getElementById('searchInput').value.trim();
+    function searchAndStoreSong(songTitle) {
+      fetch(sheetURL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `title=${encodeURIComponent(songTitle)}`,
+      })
+      .then(res => res.text())
+      .then(text => {
+        console.log("Stored:", text);
+        skipNextFetch = true; // ✅ skip one fetch after storing
+      })
+      .catch(err => console.error("POST failed:", err));
+    }
+
+    // ✅ Replaced function starts here
+    function searchSong(queryFromParam = null, retry = 0) {
+      const query = queryFromParam || document.getElementById('searchInput').value.trim();
       if (!query) return;
-      const apiKey = getApiKey();
+
+      const apiKey = apiKeys[retry];
+      if (!apiKey) return alert("Foxxy's servers are resting 🎧 Come back in a few hours😴.");
+
       fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query)}&key=${apiKey}&type=video&videoEmbeddable=true&maxResults=1`)
         .then(res => res.json())
         .then(data => {
-          if (!data.items || !data.items.length) return;
+          if (!data.items || !data.items.length) throw new Error("No results");
+
           const video = data.items[0];
-          player.loadVideoById(video.id.videoId);
-          document.getElementById('videoTitle').innerText = video.snippet.title;
-          document.getElementById('videoArtist').innerText = "YouTube Audio";
-          document.getElementById('thumbnail').style.backgroundImage = `url(${video.snippet.thumbnails.medium.url})`;
-          setTimeout(() => { duration = player.getDuration(); }, 1500);
+          const videoId = video.id.videoId;
+          const title = video.snippet.title;
+          const thumb = video.snippet.thumbnails.medium.url;
+
+          player.loadVideoById(videoId);
+          document.getElementById('videoTitle').innerText = title;
+          document.getElementById('thumbnail').src = thumb;
+          document.getElementById('thumbnail').style.display = 'block';
+
+          setTimeout(() => {
+            player.unMute();
+            player.playVideo();
+            duration = player.getDuration();
+            updateTrackProgress();
+          }, 1500);
+
+          if (!queryFromParam) {
+            searchAndStoreSong(query);
+            lastPlayed = query;
+          }
+        })
+        .catch(err => {
+          console.warn(`API key failed: ${apiKey}. Retrying...`);
+          searchSong(queryFromParam, retry + 1);
         });
     }
+    // ✅ Replaced function ends here
 
-    // Load YouTube Iframe API
+    function fetchFromSheet() {
+      if (skipNextFetch) {
+        skipNextFetch = false; // ✅ ignore once only
+        return;
+      }
+
+      fetch(sheetURL)
+        .then(res => res.text())
+        .then(songTitle => {
+          songTitle = songTitle.trim();
+          if (songTitle && songTitle !== lastPlayed) {
+            lastPlayed = songTitle;
+            document.getElementById('searchInput').value = songTitle;
+            searchSong(songTitle); // Trigger search and play
+          }
+        })
+        .catch(err => console.error("Fetch failed:", err));
+    }
+
     const tag = document.createElement('script');
     tag.src = "https://www.youtube.com/iframe_api";
-    document.body.appendChild(tag);
+    const firstScriptTag = document.getElementsByTagName('script')[0];
+    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
   </script>
 </body>
 </html>
