@@ -167,7 +167,21 @@ function updatePlaylistUI(){
   });
 }
 function deleteSong(idx){playlistSongs.splice(idx,1);savePlaylist();updatePlaylistUI();}
-function playSongAt(idx){const song=playlistSongs[idx];if(!song) return;player.loadVideoById(song.id);document.getElementById('videoTitle').innerText=song.name;document.getElementById('thumbnail').style.backgroundImage=`url(${song.thumb})`;isPlaying=true;document.getElementById('playIcon').style.display="none";document.getElementById('pauseIcon').style.display="block";}
+function playSongAt(idx) {
+  const song = playlistSongs[idx];
+  if (!song) return;
+  player.loadVideoById(song.id);
+  document.getElementById('videoTitle').innerText = song.name;
+  document.getElementById('thumbnail').style.backgroundImage = `url(${song.thumb})`;
+
+  // ✅ hide foxxy icon + text when playlist plays
+  document.querySelector('.default-icon').style.display = 'none';
+  document.querySelector('.default-text').style.display = 'none';
+
+  isPlaying = true;
+  document.getElementById('playIcon').style.display = "none";
+  document.getElementById('pauseIcon').style.display = "block";
+}
 function playNextSong(){currentSongIndex++;if(currentSongIndex<playlistSongs.length){playSongAt(currentSongIndex);}}
 
 // Init
