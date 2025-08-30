@@ -1,335 +1,178 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Foxxy Music</title>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-<style>
-body { 
-  background:#121212; 
-  font-family:'Poppins',sans-serif; 
-  margin:0; 
-  padding:0; 
-  color:white; 
-  display:flex; 
-  flex-direction:column; 
-  align-items:center; 
-  user-select:none; 
-}
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Foxxy Music</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+button { user-select: none; -webkit-tap-highlight-color: transparent; outline: none; }
+body { background: #121212; font-family: 'Poppins', sans-serif; margin: 0; padding: 0; color: white; display: flex; flex-direction: column; align-items: center; user-select: none; }
 
 /* Search bar */
-.search-bar { display:flex; width:90%; max-width:400px; margin:20px auto; border-radius:25px; overflow:hidden; background:#282828; }
-.search-bar input { flex:1; border:none; padding:12px 15px; outline:none; background:transparent; color:white; font-size:14px; }
-.search-bar button { background:#1db954; color:white; border:none; padding:0 20px; cursor:pointer; font-weight:bold; }
+.search-bar { display: flex; width: 90%; max-width: 400px; margin: 20px auto; border-radius: 25px; overflow: hidden; background: #282828; }
+.search-bar input { flex: 1; border: none; padding: 12px 15px; outline: none; background: transparent; color: white; font-size: 14px; }
+.search-bar button { background: #1db954; color: white; border: none; padding: 0 15px; cursor: pointer; font-weight: bold; }
 
 /* Album art */
-.album-art { 
-  position:relative; 
-  width:250px; 
-  height:250px; 
-  border-radius:10px; 
-  margin-top:20px; 
-  background:#333 center/cover no-repeat; 
-  box-shadow:0 10px 30px rgba(0,0,0,0.5); 
-  display:flex; 
-  justify-content:center; 
-  align-items:center; 
-  overflow:hidden; 
-  flex-direction:column; 
-}
-.default-icon { fill:#1DB954; width:90px; height:90px; opacity:0.6; pointer-events:none; user-select:none; margin-bottom:10px; }
-.default-text { color:#1DB954; font-size:1.8rem; font-weight:600; opacity:0.6; font-family:'Poppins',sans-serif; pointer-events:none; user-select:none; margin-top:0; }
+.album-art { position: relative; width: 250px; height: 250px; border-radius: 10px; margin-top: 20px; background: #333 center/cover no-repeat; box-shadow: 0 10px 30px rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; overflow: hidden; flex-direction: column; }
+.default-icon { fill: #1DB954; width: 90px; height: 90px; opacity: 0.6; margin-bottom: 10px; }
+.default-text { color: #1DB954; font-size: 1.8rem; font-weight: 600; opacity: 0.6; font-family: 'Poppins', sans-serif; }
 
 /* Song title */
-.song-title { font-size:1.2em; font-weight:600; margin-top:20px; text-align:center; }
-.song-artist { font-size:0.9em; opacity:0.8; text-align:center; }
+.song-title { font-size: 1.2em; font-weight: 600; margin-top: 20px; text-align: center; }
+.song-artist { font-size: 0.9em; opacity: 0.8; text-align: center; }
 
 /* Controls */
-.controls { margin-top:30px; display:flex; justify-content:center; align-items:center; gap:15px; }
-.controls button { background:#1db954; border:none; width:60px; height:60px; border-radius:50%; cursor:pointer; box-shadow:0 5px 15px rgba(0,0,0,0.3); transition:transform 0.2s ease; display:flex; align-items:center; justify-content:center; }
-.controls button:hover { transform:scale(1.1); }
-.controls svg { width:28px; height:28px; fill:white; }
+.controls { margin-top: 30px; display: flex; justify-content: center; align-items: center; gap: 15px; }
+.controls button { background: #1db954; border: none; width: 60px; height: 60px; border-radius: 50%; cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.3); transition: transform 0.2s ease; display: flex; align-items: center; justify-content: center; }
+.controls button:hover { transform: scale(1.1); }
+.controls svg { width: 28px; height: 28px; fill: white; }
 
 /* Progress bar */
-.progress-container { width:60%; margin-top:20px; display:flex; flex-direction:column; align-items:center; }
-@media screen and (max-width:600px){ .progress-container { width:80%; } }
-.time { display:flex; justify-content:space-between; width:100%; font-size:0.8em; opacity:0.8; }
-.progress-bar { width:100%; -webkit-appearance:none; height:3px; background:rgba(255,255,255,0.3); outline:none; border-radius:5px; overflow:hidden; }
-.progress-bar::-webkit-slider-thumb { -webkit-appearance:none; appearance:none; width:10px; height:10px; border-radius:50%; background:#1db954; cursor:pointer; }
+.progress-container { margin-top: 25px; width: 80%; display: flex; flex-direction: column; align-items: center; }
+.time { display: flex; justify-content: space-between; width: 100%; font-size: 0.8em; opacity: 0.8; }
+.progress-bar { width: 100%; -webkit-appearance: none; height: 5px; background: rgba(255,255,255,0.3); outline: none; border-radius: 5px; overflow: hidden; }
+.progress-bar::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 12px; height: 12px; border-radius: 50%; background: #1db954; cursor: pointer; }
 
-/* Volume */
-.volume-container { display:flex; align-items:center; position:relative; }
-#volumeControl { width:0; opacity:0; transition: width 0.3s ease, opacity 0.3s ease; margin-left:5px; }
-.volume-container.show #volumeControl { width:100px; opacity:1; }
-#volumeBtn { background:#1db954; border:none; width:40px; height:40px; border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center; }
-#volumeBtn svg { width:20px; height:20px; fill:white; }
+/* Volume control */
+.volume-container { display: flex; align-items: center; position: relative; }
+#volumeControl { width: 0; opacity: 0; transition: width 0.3s ease, opacity 0.3s ease; margin-left: 5px; }
+.volume-container.show #volumeControl { width: 100px; opacity: 1; }
+#volumeBtn { background: #1db954; border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+#volumeBtn svg { width: 20px; height: 20px; fill: white; }
 
-/* Playlist panel */
-#playlistPanel {
-  position:fixed; bottom:-100%; left:50%; transform:translateX(-50%);
-  width:90%; max-width:350px; background:#222; padding:10px; border-radius:10px 10px 0 0;
-  box-shadow:0 -5px 20px rgba(0,0,0,0.5); transition:bottom 0.3s ease; z-index:100;
-  max-height:70%; overflow-y:auto;
-}
-#playlistPanel.show { bottom:0; }
-#playlistPanel input { width:calc(100% - 50px); padding:6px; margin-bottom:5px; border-radius:5px; border:none; outline:none; }
-#playlistPanel button.addBtn { padding:8px; border-radius:50%; width:35px; height:35px; font-size:1rem; display:flex; align-items:center; justify-content:center; background:#1db954; border:none; cursor:pointer; }
-#playlistPanel > div button.playPanelBtn { padding:4px 10px; font-size:0.8rem; background:#1db954; border:none; border-radius:5px; cursor:pointer; }
-
-/* Playlist items */
-.songItem { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px; cursor:pointer; padding:3px 5px; border-radius:5px; }
-.songItem:hover { background:rgba(255,255,255,0.1); }
-.songItem img { width:50px; height:50px; border-radius:5px; }
-.songItem span { flex:1; font-size:14px; color:white; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-.songItem button.deleteBtn { background:#ff4b4b; border:none; padding:2px 6px; border-radius:50%; color:white; font-size:0.7rem; cursor:pointer; }
-
-@media screen and (max-width:600px){
-  #playlistPanel { width:90%; }
-  #playlistPanel input { font-size:0.9rem; }
-  .songItem img { width:40px; height:40px; }
-}
-
-/* Playlist toggle button */
-#playlistToggle { position:fixed; bottom:20px; right:20px; width:50px; height:50px; border-radius:50%; background:#1db954; border:none; color:white; font-size:1.2rem; cursor:pointer; z-index:101; }
-
-</style>
+/* Playlist Panel */
+#playlistPanel { display:none; position: fixed; right: 10px; top: 70px; width: 240px; background:#222; padding:10px; border-radius:8px; max-height:300px; overflow-y:auto; }
+#playlistPanel input { width:100%; padding:5px; margin-bottom:5px; border-radius:4px; border:none; }
+#playlistPanel ul { list-style:none; padding:0; margin:0; }
+#playlistPanel li { display:flex; align-items:center; gap:8px; padding:5px; cursor:pointer; }
+#playlistPanel li img { width:40px; height:40px; border-radius:4px; object-fit:cover; }
+#playlistPanel li:hover { background:#1db954; }
+.delete-btn { margin-left:auto; background:red; color:white; border:none; padding:2px 6px; border-radius:4px; cursor:pointer; }
+  </style>
 </head>
 <body>
 
-<div class="search-bar">
-  <input type="text" id="searchInput" placeholder="Search a song...">
-  <button>Search</button>
-</div>
-
-<div class="album-art" id="thumbnail">
-  <svg class="default-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 3v10.55A4 4 0 1 0 14 17V7h4V3h-6z"/></svg>
-  <div class="default-text">Foxxy</div>
-</div>
-
-<div class="song-title" id="videoTitle">Song Title</div>
-<div class="song-artist" id="videoArtist">Artist</div>
-
-<div class="controls">
-  <button>Prev</button>
-  <button>Play/Pause</button>
-  <button>Next</button>
-  <div class="volume-container">
-    <button id="volumeBtn"><svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3z"/></svg></button>
-    <input type="range" id="volumeControl" min="0" max="100" value="50">
+  <!-- Search -->
+  <div class="search-bar">
+    <input type="text" id="searchInput" placeholder="Search a song...">
+    <button onclick="searchSong()">Search</button>
+    <button onclick="togglePlaylistPanel()">Playlist</button>
   </div>
-</div>
 
-<div class="progress-container">
-  <div class="time"><span>0:00</span><span>0:00</span></div>
-  <input type="range" class="progress-bar" value="0" min="0" max="100">
-</div>
-
-<!-- Playlist Panel -->
-<div id="playlistPanel">
-  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-    <h3>Playlist</h3>
-    <button class="playPanelBtn">Play</button>
+  <!-- Album Art -->
+  <div class="album-art" id="thumbnail">
+    <svg class="default-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+      <path d="M12 3v10.55A4 4 0 1 0 14 17V7h4V3h-6z"/>
+    </svg>
+    <div class="default-text">Foxxy</div>
   </div>
-  <input type="text" id="playlistInput" placeholder="Add song...">
-  <button class="addBtn">+</button>
-  <div id="playlistItems"></div>
-</div>
 
-<!-- Playlist Toggle Button -->
-<button id="playlistToggle">🎵</button>
+  <!-- Song Info -->
+  <div class="song-title" id="videoTitle">Song Title</div>
+  <div class="song-artist" id="videoArtist">Artist</div>
 
+  <!-- Controls -->
+  <div class="controls">
+    <button id="playPauseBtn" onclick="togglePlay()">
+      <svg id="playIcon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+      <svg id="pauseIcon" style="display:none;" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+    </button>
+    <div class="volume-container">
+      <button id="volumeBtn" onclick="toggleVolumeSlider()">
+        <svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3z"/></svg>
+      </button>
+      <input type="range" id="volumeControl" min="0" max="100" value="50">
+    </div>
+  </div>
 
-<script>
+  <!-- Progress -->
+  <div class="progress-container">
+    <div class="time">
+      <span id="currentTime">0:00</span>
+      <span id="totalTime">0:00</span>
+    </div>
+    <input type="range" id="progressBar" class="progress-bar" value="0" min="0" max="100">
+  </div>
+
+  <!-- Playlist Panel -->
+  <div id="playlistPanel">
+    <input type="text" id="playlistInput" placeholder="Add song to playlist">
+    <button onclick="addPlaylistInputSong()">Add</button>
+    <ul id="playlist"></ul>
+  </div>
+
+  <!-- Hidden Player -->
+  <div id="player" style="position:absolute; left:-9999px;"></div>
+
+  <script>
 let player, duration=0, isPlaying=true, interval;
-let playlist = JSON.parse(localStorage.getItem('playlist') || '[]');
-let currentIndex = -1;
+const apiKeys=["AIzaSyA6HuHCZSivAGvISxA4h3EglIQJgmee66k","AIzaSyCkUWUbVYjZDNRhNJBJ-NkN8ta3ga4vY3Y","AIzaSyD8TitWTpspygPuDnbilqeaLj9AG1krL48"];
+let currentKeyIndex=0;
+let playlistSongs=JSON.parse(localStorage.getItem('playlistSongs')||'[]');
+let currentSongIndex=0;
 
-// API keys
-const apiKeys = [
-  "AIzaSyA6HuHCZSivAGvISxA4h3EglIQJgmee66k",
-  "AIzaSyCkUWUbVYjZDNRhNJBJ-NkN8ta3ga4vY3Y",
-  "AIzaSyD8TitWTpspygPuDnbilqeaLj9AG1krL48"
-];
-let currentKeyIndex = 0;
-function getApiKey(){ 
-  const key = apiKeys[currentKeyIndex]; 
-  currentKeyIndex = (currentKeyIndex + 1) % apiKeys.length; 
-  return key; 
-}
+function getApiKey(){const key=apiKeys[currentKeyIndex];currentKeyIndex=(currentKeyIndex+1)%apiKeys.length;return key;}
+function formatTime(sec){const m=Math.floor(sec/60);const s=Math.floor(sec%60);return `${m}:${s.toString().padStart(2,'0')}`;}
+function updateProgress(){if(player&&typeof player.getCurrentTime==='function'){const current=player.getCurrentTime();document.getElementById('currentTime').innerText=formatTime(current);document.getElementById('progressBar').value=(current/duration)*100||0;}}
+function onYouTubeIframeAPIReady(){player=new YT.Player('player',{height:'360',width:'640',videoId:'',playerVars:{autoplay:0,controls:0,modestbranding:1,rel:0},events:{onReady:onPlayerReady,onStateChange:onPlayerStateChange}});document.getElementById('playIcon').style.display='none';document.getElementById('pauseIcon').style.display='block';}
+function onPlayerReady(){interval=setInterval(updateProgress,1000);}
+function onPlayerStateChange(e){if(e.data===YT.PlayerState.ENDED){playNextSong();}}
 
-// Format time helper
-function formatTime(sec){
-  const m=Math.floor(sec/60);
-  const s=Math.floor(sec%60);
-  return `${m}:${s.toString().padStart(2,'0')}`;
-}
+function togglePlay(){if(!isPlaying){player.playVideo();document.getElementById('playIcon').style.display="none";document.getElementById('pauseIcon').style.display="block";}else{player.pauseVideo();document.getElementById('playIcon').style.display="block";document.getElementById('pauseIcon').style.display="none";}isPlaying=!isPlaying;}
+function toggleVolumeSlider(){document.querySelector('.volume-container').classList.toggle('show');}
+document.getElementById('volumeControl').addEventListener('input',function(){player.setVolume(this.value);});
 
-// Update progress
-function updateProgress(){
-  if(player && typeof player.getCurrentTime==='function'){
-    const current = player.getCurrentTime();
-    document.querySelector('.progress-container span:first-child').innerText=formatTime(current);
-    document.querySelector('.progress-bar').value=(current/duration)*100||0;
-
-    if(current >= duration-1){
-      nextSong();
-    }
-  }
-}
-
-// Load YouTube API
-function onYouTubeIframeAPIReady(){
-  player = new YT.Player('player',{
-    height:'360', width:'640', videoId:'', 
-    playerVars:{autoplay:0,controls:0,modestbranding:1,rel:0}, 
-    events:{onReady:onPlayerReady}
-  });
-}
-function onPlayerReady(){ interval=setInterval(updateProgress,1000); }
-
-// Controls
-function togglePlay(){
-  if(!isPlaying){ player.playVideo(); } 
-  else { player.pauseVideo(); }
-  isPlaying = !isPlaying;
-}
-
-function toggleVolumeSlider(){ document.querySelector('.volume-container').classList.toggle('show'); }
-document.getElementById('volumeControl').addEventListener('input',function(){ player.setVolume(this.value); });
-
-document.querySelector('.progress-bar').addEventListener('input',function(){
-  if(player && typeof player.seekTo==='function'){
-    player.seekTo((this.value/100)*duration,true);
-  }
-});
-
-// Search song
-function searchSong(query){
-  if(!query || query.trim()==='') {
-    query = document.getElementById('searchInput').value.trim();
-  }
+function searchSong(query,save=false){
+  query=query||document.getElementById('searchInput').value.trim();
   if(!query) return;
-
-  const apiKey = getApiKey();
+  const apiKey=getApiKey();
   fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query)}&key=${apiKey}&type=video&videoEmbeddable=true&maxResults=1`)
-    .then(res => res.json())
-    .then(data => { 
-      if(!data.items || !data.items.length) return;
-
-      const video = data.items[0];
-      
-      // Ensure player is ready
-      if(player && typeof player.loadVideoById === 'function'){
-        player.loadVideoById({
-          videoId: video.id.videoId,
-          startSeconds: 0,
-          suggestedQuality: 'default'
-        });
-        player.playVideo();
-      }
-
-      // Update UI
-      document.getElementById('videoTitle').innerText = video.snippet.title;
-      document.getElementById('videoArtist').innerText = "YouTube Audio";
-      document.getElementById('thumbnail').style.backgroundImage = `url(${video.snippet.thumbnails.medium.url})`;
-      document.querySelector('.default-icon').style.display='none';
-      document.querySelector('.default-text').style.display='none';
-
-      setTimeout(()=>{
-        if(player && typeof player.getDuration==='function'){
-          duration = player.getDuration();
-          isPlaying = true;
-          document.getElementById('playIcon').style.display="none";
-          document.getElementById('pauseIcon').style.display="block";
-        }
-      },1500);
-    }).catch(err => console.log("YouTube API error:", err));
-}
-function playVideoData(video){
-  player.loadVideoById(video.id.videoId);
-  document.getElementById('videoTitle').innerText = video.snippet.title;
-  document.getElementById('videoArtist').innerText = "YouTube Audio";
-  document.getElementById('thumbnail').style.backgroundImage = `url(${video.snippet.thumbnails.medium.url})`;
-  document.querySelector('.default-icon').style.display='none';
-  document.querySelector('.default-text').style.display='none';
-  setTimeout(()=>{ duration=player.getDuration(); isPlaying=true; },1500);
-}
-
-// Playlist Functions
-function togglePlaylist(){ document.getElementById('playlistPanel').classList.toggle('show'); }
-
-function addToPlaylist(){
-  const input = document.getElementById('playlistInput');
-  const song = input.value.trim();
-  if(!song) return;
-
-  if(playlist.find(p=>p.title===song)){ input.value=''; return; }
-
-  const apiKey = getApiKey();
-  fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(song)}&key=${apiKey}&type=video&videoEmbeddable=true&maxResults=1`)
-    .then(res=>res.json())
-    .then(data=>{ 
-      if(!data.items || !data.items.length) return;
-      const video = data.items[0];
-      playlist.push({ title:video.snippet.title, thumbnail:video.snippet.thumbnails.default.url });
-      localStorage.setItem('playlist',JSON.stringify(playlist));
-      input.value='';
-      renderPlaylist();
-    });
-}
-
-function renderPlaylist(){
-  const container = document.getElementById('playlistItems'); 
-  container.innerHTML='';
-  playlist.forEach((item,index)=>{
-    const div=document.createElement('div'); 
-    div.classList.add('songItem');
-    div.innerHTML=`<img src="${item.thumbnail}" alt="thumb"><span onclick="playFromPlaylist(${index})">${item.title}</span>
-    <button class="deleteBtn" onclick="deleteSong(${index})">x</button>`;
-    container.appendChild(div);
+  .then(res=>res.json())
+  .then(data=>{
+    if(!data.items||!data.items.length) return;
+    const video=data.items[0];
+    player.loadVideoById(video.id.videoId);
+    document.getElementById('videoTitle').innerText=video.snippet.title;
+    document.getElementById('videoArtist').innerText="YouTube Audio";
+    document.getElementById('thumbnail').style.backgroundImage=`url(${video.snippet.thumbnails.medium.url})`;
+    document.querySelector('.default-icon').style.display='none';
+    document.querySelector('.default-text').style.display='none';
+    duration=player.getDuration();
+    isPlaying=true;
+    document.getElementById('playIcon').style.display="none";
+    document.getElementById('pauseIcon').style.display="block";
+    // Save song with thumbnail only once
+    if(save){
+      playlistSongs.push({name:video.snippet.title,thumb:video.snippet.thumbnails.default.url,id:video.id.videoId});
+      savePlaylist();
+      updatePlaylistUI();
+    }
   });
 }
 
-function deleteSong(index){
-  playlist.splice(index,1);
-  localStorage.setItem('playlist',JSON.stringify(playlist));
-  if(currentIndex===index) currentIndex=-1;
-  renderPlaylist();
+// Playlist
+function togglePlaylistPanel(){const panel=document.getElementById('playlistPanel');panel.style.display=panel.style.display==='none'?'block':'none';}
+function addPlaylistInputSong(){const songName=document.getElementById('playlistInput').value.trim();if(!songName) return;searchSong(songName,true);document.getElementById('playlistInput').value='';}
+function savePlaylist(){localStorage.setItem('playlistSongs',JSON.stringify(playlistSongs));}
+function updatePlaylistUI(){
+  const ul=document.getElementById('playlist');ul.innerHTML='';
+  playlistSongs.forEach((song,idx)=>{
+    const li=document.createElement('li');
+    const img=document.createElement('img');img.src=song.thumb;li.appendChild(img);
+    const span=document.createElement('span');span.textContent=song.name;li.appendChild(span);
+    li.onclick=function(e){if(e.target.classList.contains('delete-btn')) return; currentSongIndex=idx;playSongAt(idx);};
+    const del=document.createElement('button');del.textContent="X";del.className="delete-btn";del.onclick=function(e){e.stopPropagation();deleteSong(idx);};li.appendChild(del);
+    ul.appendChild(li);
+  });
 }
+function deleteSong(idx){playlistSongs.splice(idx,1);savePlaylist();updatePlaylistUI();}
+function playSongAt(idx){const song=playlistSongs[idx];if(!song) return;player.loadVideoById(song.id);document.getElementById('videoTitle').innerText=song.name;document.getElementById('thumbnail').style.backgroundImage=`url(${song.thumb})`;isPlaying=true;document.getElementById('playIcon').style.display="none";document.getElementById('pauseIcon').style.display="block";}
+function playNextSong(){currentSongIndex++;if(currentSongIndex<playlistSongs.length){playSongAt(currentSongIndex);}}
 
-function playFromPlaylist(index){
-  currentIndex = index;
-  const songTitle = playlist[index].title;
-  document.getElementById('searchInput').value = songTitle;
-  searchSong(songTitle);
-}
-
-function nextSong(){
-  if(playlist.length===0) return;
-  currentIndex=(currentIndex+1)%playlist.length;
-  playFromPlaylist(currentIndex);
-}
-
-function prevSong(){
-  if(playlist.length===0) return;
-  currentIndex=(currentIndex-1+playlist.length)%playlist.length;
-  playFromPlaylist(currentIndex);
-}
-
-// Event Listeners
-document.querySelector('#playlistPanel .addBtn').addEventListener('click', addToPlaylist);
-document.getElementById('playlistInput').addEventListener('keypress', function(e){
-  if(e.key === 'Enter'){ addToPlaylist(); }
-});
-document.getElementById('playlistToggle').addEventListener('click', togglePlaylist);
-
-// Initialize
-renderPlaylist();
-
-// Load YouTube API
-const tag = document.createElement('script');
-tag.src = "https://www.youtube.com/iframe_api";
-document.body.appendChild(tag);
+// Init
+updatePlaylistUI();
+const tag=document.createElement('script');tag.src="https://www.youtube.com/iframe_api";document.body.appendChild(tag);
 </script>
 
 </body>
